@@ -1,6 +1,10 @@
 using QWNNM
 using Test
 
-@testset "QWNNM.jl" begin
-    # Write your tests here.
-end
+nSig  = 10
+Img_O = loadImg("lena.png")
+Img_N = loadImg("lenaN.png")
+
+@test psnr(addNoise(Img_O, 10), Img_O) ≈ psnr(Img_N, Img_O)
+
+

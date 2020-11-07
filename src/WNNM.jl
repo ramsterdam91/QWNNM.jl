@@ -1,4 +1,4 @@
-function WNNM(Y, C, Sig_arr, m)
+function WNNM(Y::Array{Float32,3}, C::Float32, Sig::Array{Float32,1}, m::Array{Float32,3})
 
     F = svd(F2cplx(Y))
 
@@ -6,38 +6,35 @@ function WNNM(Y, C, Sig_arr, m)
 
     patNum = size(Y)[2]
 
-    mean_Sig_arr = √(sum(Sig_arr[:].^2) / length(Sig_arr[:]))
+    mean_Sig_arr = √(sum(Sig[:].^2) / length(Sig[:]))
 
-    TempC  = C * √(patNum) * 2 * mean_Sig_arr^2
+    TempC  = Float32(C * √(patNum) * 2 * mean_Sig_arr^2)
 
-    (X_arr, svp) = ClosedQWNNM(F.S, TempC)
+    X_arr = ClosedQWNNM(F.S, TempC,eps())
 
     X = F.U * Diagonal(X_arr) * F.Vt
 
     return cplx2F(X) .+ m
 end
 
-function ClosedQWNNM(SigmaY, c)
-    eps = eps()
+function ClosedQWNNM(SigmaY::Array{Float32,1}, c::Float32, our_eps)
 
-    temp = (SigmaY .- eps) .^ 2 - 4 * ((-1) * eps .* SigmaY .+ c)
-    
-    ind = []
-    SigmaX = []
-    
+    temp = (SigmaY .- our_eps) .^ 2 - 4 * ((-1) * our_eps .* SigmaY .+ c)
+    ind = Int32[]
+    SigmaX = Float32[]
     for i in 1:length(temp)
         if temp[i] > 0
             push!(ind, i)
-            push!(SigmaX, max(SigmaY[i] - eps + √(temp[i]) , 0) / 2) 
+            push!(SigmaX, max(SigmaY[i] - our_eps + √(temp[i]) , 0) / 2) 
         else 
             push!(SigmaX, 0)
         end
     end
     
-    SigmaX
+    return SigmaX
 end
 
-function F2cplx(M)
+function F2cplx(M::Array{Float32,3})::Array{Complex{Float32},2}
     (h, w) = size(M)
 
     cM = adjoint(M)
@@ -45,13 +42,13 @@ function F2cplx(M)
     [cM[1:2*h, 1:w]; cM[1:2*h, w+1:2*w]]
 end
 
-function adjoint(A)
+function adjoint(A::Array{Float32,3})::Array{Complex{Float32},2}
     W = zeros(size(A)[1:2])
     X = A[:, :, 1]
     Y = A[:, :, 2]
     Z = A[:, :, 3]
-
-    vcat(hcat(W + im .* X, Y + im .* Z),hcat(-Y + im .* Z, W - im .* X))
+    imm = Complex{Float32}(im)
+    vcat(hcat(W + imm .* X, Y + imm .* Z),hcat(-Y + imm .* Z, W - imm .* X))
 end
 
 function cplx2F(M)

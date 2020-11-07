@@ -1,4 +1,4 @@
-__precompile__()
+__precompile__
 
 module QWNNM
 
@@ -12,9 +12,5 @@ module QWNNM
     include("addNoise.jl")
     include("psnr.jl")
     include("denoising.jl")
-    
-    export addNoise
-    export denoising
-    export psnr
     
 end

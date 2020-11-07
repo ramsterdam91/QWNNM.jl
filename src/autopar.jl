@@ -18,32 +18,32 @@ end
 function autopar(nSig)
   
     SearchWin =   30  
-    delta     =   0.1
-    c         =   3*√(2)
+    delta     =   Float32(0.1) 
+    c         =   Float32(3*√(2))
     Innerloop =   2
 
     if          nSig <= 20
         patsize       =   6             
         patnum        =   70            
         Iter          =   8            
-        lamada        =   0.54 
+        lamada        =   Float32(0.54) 
     elseif      nSig <= 40
         patsize       =   7             
         patnum        =   90           
         Iter          =   12            
-        lamada        =   0.56  
+        lamada        =   Float32(0.56)  
     elseif      nSig <= 60
         patsize       =   8             
         patnum        =   120          
         Iter          =   14            
-        lamada        =   0.58    
+        lamada        =   Float32(0.58)  
     else
         patsize       =   9             
         patnum        =   140           
         Iter          =   14          
-        lamada        =   0.58   
+        lamada        =   Float32(0.58)    
     end
-    step              =   patsize ÷ 2
+    step              =   patsize ÷ 2 -1
 
     PAR(nSig, SearchWin, delta, c, Innerloop, patsize, patnum , Iter, lamada, step)
 end

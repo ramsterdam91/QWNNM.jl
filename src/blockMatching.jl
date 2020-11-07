@@ -1,4 +1,4 @@
-function blockMatching(X::Array{Float32,2}, Par::PAR, Neighbor_arr::Array{Int32,2}, Num_arr::Array{Int32,2}, SelfIndex_arr::Array{Int32,2})::Array{Int32,2}
+function blockMatching(X::Array{Float32,3}, Par::PAR, Neighbor_arr::Array{Int32,2}, Num_arr::Array{Int32,1}, SelfIndex_arr::Array{Int32,1})::Array{Int32,2}
 
     L = length(Num_arr)
 

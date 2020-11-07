@@ -25,7 +25,7 @@ function denoising(Img_O::Array{Float32,3}, Img_N::Array{Float32,3}, Par::PAR)::
 
     CurPat              =   zeros(Float32, Par.patsize^2, TotalPatNum)
     EPat                =   zeros(Float32, size(CurPat))
-    W                   =   zeros(Float32, size(CurPat))
+    WPat                =   zeros(Int32, size(CurPat))
 
     #PSNR reflect the quality of `Img_E`
     PSNR_arr            =   zeros(Float64, 1, Par.Iter)
@@ -33,7 +33,7 @@ function denoising(Img_O::Array{Float32,3}, Img_N::Array{Float32,3}, Par::PAR)::
     for iter in 1 : Par.Iter
 
         #Iterative method
-        Img_E =	Img_E + Par.delta * (Img_N - Img_E)
+        Img_E =	Img_E + Par.delta * (Img_N - Img_E) 
 
         #image to patch `CurPat` and estimate local noise variance `Sigma_arr`
         (CurPat, Sigma_arr)	= im2patch(Img_E, Img_N, Par)
@@ -52,10 +52,10 @@ function denoising(Img_O::Array{Float32,3}, Img_N::Array{Float32,3}, Par::PAR)::
             end
         end
         #Estimate all the patches
-        (EPat, W) = patEstimation(NL_mat, Self_arr, Sigma_arr, CurPat, Par)
+        (EPat, WPat) = patEstimation(NL_mat, Self_arr, Sigma_arr, CurPat, Par)
 
         #get Estimated image from patches
-        Img_E = patch2Im(EPat, W, Par.patsize, H, W, D)
+        Img_E = patch2Im(EPat, WPat, Par.patsize, H, W, D)
 
         #record PSNR in each Iteration
         PSNR_arr[iter]  = psnr(Img_O, Img_E)
@@ -126,10 +126,10 @@ end
 
 function im2patch(Img_E::Array{Float32,3}, Img_N::Array{Float32,3}, Par::PAR)
 
-    (H, W, D) = size(E_Img)
+    (H, W, D) = size(Img_E)
     N           =   H - Par.patsize + 1
     M           =   W - Par.patsize + 1
-    TotalPatNum = patsr * patsc
+    TotalPatNum =   N * M
 
     Y           =   zeros(Float32, Par.patsize^2, TotalPatNum, D)       #Current Patches
     N_Y         =   zeros(Float32, Par.patsize^2, TotalPatNum, D)       #Noisy   Patches
@@ -145,8 +145,8 @@ function im2patch(Img_E::Array{Float32,3}, Img_N::Array{Float32,3}, Par::PAR)
             E_patch      =  Img_E[i:n, j:m, :]::Array{Float32,3}
             N_patch      =  Img_N[i:n, j:m, :]::Array{Float32,3}
 
-            Y[k,:,:]     =  reshape(E_patch, (1, N*M, PicD))
-            N_Y[k,:,:]   =  reshape(N_patch, (1, N*M, PicD))
+            Y[k,:,:]     =  reshape(E_patch, (1, N*M, D))
+            N_Y[k,:,:]   =  reshape(N_patch, (1, N*M, D))
 
         end
     end
@@ -157,7 +157,7 @@ function im2patch(Img_E::Array{Float32,3}, Img_N::Array{Float32,3}, Par::PAR)
     (Y, SigmaArr)
 end
 
-function patch2Im(ImPat::Array{Float32,3}, WPat::Array{Float32,3}, PatSize, H, W, D)
+function patch2Im(ImPat::Array{Float32,3}, WPat::Array{Int32,3}, PatSize, H, W, D)
     N       =   H - PatSize + 1
     M       =   W - PatSize + 1
     TempOffsetR  =   Vector(1:N)
@@ -176,5 +176,5 @@ function patch2Im(ImPat::Array{Float32,3}, WPat::Array{Float32,3}, PatSize, H, W
 
         end
     end
-    Img_E   =  Img_E ./ (Img_W .+ eps())
+    Img_E   =  Float32.(Img_E ./ (Img_W .+ eps()))
 end
