@@ -1,5 +1,20 @@
+__precompile__()
+
 module QWNNM
 
-# Write your package code here.
+    using Images
+    using Random
+    using Statistics
+    using LinearAlgebra
+    using Quaternions
+    using GenericSVD
 
+    include("addNoise.jl")
+    include("psnr.jl")
+    include("denoising.jl")
+    
+    export addNoise
+    export denoising
+    export psnr
+    
 end
