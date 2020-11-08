@@ -1,8 +1,9 @@
 using QWNNM
 using ImageView
+using Images
 
 function loadImg(path)
-    #from [0.,1.] to [0,256] 
+    #from [0.,1.] to [0,256]
     Img = 255 * float32.(channelview(load(path)))
     #Switch 1,3 Axis
     Img = permutedims(Img,(2, 3, 1))
@@ -16,11 +17,11 @@ function beImg(Img::Array{Float32,3})
 end
 
 nSig  = 10
-Img_O = loadImg("lena.png")
-Img_N = loadImg("lenaN.png")
+Img_O = loadImg(joinpath(@__DIR__, "lena.png"))
+Img_N = loadImg(joinpath(@__DIR__, "lenaN.png"))
 
 Par = QWNNM.autopar(nSig)
 
-Img_E = QWNNM.denoising(Img_O, Img_N, Par)
+@profiler Img_E = QWNNM.denoising(Img_O, Img_N, Par)
 
 imshow(beImg(Img_E))
